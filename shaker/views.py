@@ -1,7 +1,8 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views import generic, View
 
 from .forms import DrinksForm, IngredientForm
@@ -11,7 +12,7 @@ from .models import Drinks, Ingredients
 class IndexView(View):
 
     def get(self, request):
-        drinks_list = Drinks.objects.order_by('-pub_date')[:10]
+        drinks_list = Drinks.objects.all()
         context = {
             'drinks_list': drinks_list,
         }
@@ -56,22 +57,26 @@ class AddDrinkView(View):
 class DrinksView(View):
 
     def get(self, request, pk):
-        drinks = get_object_or_404(Drinks, pk=pk)
-        ingredients = get_object_or_404(Ingredients, pk=pk)
+        form_ingredient = IngredientForm
+        ingredient_list = Ingredients.objects.filter()
+        try:
+            drinks = Drinks.objects.filter(pub_date__lte=timezone.now()).get(pk=pk)
+        except Drinks.DoesNotExist:
+            raise Http404("Drink does not exist")
         context = {
             'drinks': drinks,
-            'ingredients': ingredients
+            'form_ingredient': form_ingredient,
+            'ingredient_list': ingredient_list,
         }
+        # print(ingredient_list)
         return render(request, 'shaker/drinks.html', context)
 
-    def post(self, request):
+    def post(self, request, pk):
+        drinks = get_object_or_404(Drinks, pk=pk)
         form_ingredient = IngredientForm(request.POST)
         if form_ingredient.is_valid():
-
             Ingredients.objects.create(
-                name=form_ingredient.cleaned_data['name'],
-                drink=form_ingredient.cleaned_data['drink'],
+                drinks=drinks,
+                name_ingredient=form_ingredient.cleaned_data["name_ingredient"]
             )
-        else:
-            messages.error(request, 'Ops, we have a problem.')
-        return HttpResponseRedirect(reverse('shaker:index'))
+        return HttpResponseRedirect(reverse('shaker:drinks', args=(drinks.id,)))

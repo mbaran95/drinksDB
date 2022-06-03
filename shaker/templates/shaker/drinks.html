@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Drinks</title>
+  <meta charset="UTF-8">
+  <title>Drinks</title>
 </head>
+
 <body>
 
 <h1>{{ drinks.name_drink }}</h1>
-<li>{{ ingredients.name_ingredient }}</li>
 
+{% for ingredient in ingredient_list %}
 
+{{ ingredient.name_ingredient }}<br>
+
+{% endfor %}
+
+<h3>Add Ingredient</h3>
+<form action="{% url 'shaker:drinks' drinks.id %}" method="post">
+  {% csrf_token %}
+
+  {{ form_ingredient.as_p }}
+
+  <input type="submit" value="Send">
+</form>
 </body>
+
 </html>
