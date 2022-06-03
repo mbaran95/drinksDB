@@ -1,0 +1,9 @@
+body {
+    background-size: cover;
+    background-position: top center;
+    background-image: url("images/background_index.webp");
+}
+
+li a {
+    color: green;
+}

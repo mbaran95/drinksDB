@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista drinków</title>
+
+    <style>
+        ul {
+        list-style-type: none;
+        }
+    </style>
+
+</head>
+<body>
+
+{% if drinks_list %}
+  <ul>
+    {% for drinks in drinks_list %}
+      <li><a href="{% url 'shaker:drinks' drinks.id %}">{{ drinks.name_drink }}</a></li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>no drinks are available</p>
+{% endif %}
+
+</body>
+</html>
