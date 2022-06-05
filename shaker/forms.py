@@ -11,3 +11,15 @@ class DrinksForm(forms.Form):
 
 class IngredientForm(forms.Form):
     name_ingredient = forms.CharField(label='Name Ingredient')
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label='Username')
+    password = forms.CharField(label='Password', widget=forms.PasswordInput)
+
+
+class RegistrationForm(forms.Form):
+    username = forms.CharField(label="Username")
+    password = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password_conf = forms.CharField(label="Password confirmation", widget=forms.PasswordInput)
+    email = forms.EmailField(label="Email")

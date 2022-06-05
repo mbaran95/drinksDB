@@ -11,12 +11,19 @@
 <h2>{{ message }}</h2>
 {% endif %}
 
+{% if user.is_authenticated %}
+{{ user }}
+<a href="{% url 'shaker:logout' %}">Logout</a>
+{% else %}
+Please, <a href="{% url 'shaker:login' %}">login</a> or <a href="{% url 'shaker:registration' %}">create account</a>.
+{% endif %}
+
 <h1>Welcome to database drinks</h1>
 
 {% if drinks_list %}
   <ul>
     {% for drinks in drinks_list %}
-      <li><a href="{% url 'shaker:drinks' drinks.id %}"> {{ drinks.name_drink }}, {{ drinks.pub_date }}</a></li>
+      <li><a href="{% url 'shaker:drinks' drinks.id %}"> {{ drinks.name_drink }}</a></li>
     {% endfor %}
   </ul>
 {% else %}
@@ -24,9 +31,7 @@
 {% endif %}
 
 <a href="{% url 'shaker:add' %}">Add drink</a><br>
-<a href="{% url 'shaker:list_drinks' %}">List Drinks</a>
-
-
+<a href="{% url 'shaker:list_drinks' %}">List Drinks</a><br>
 
 </form>
 

@@ -10,19 +10,11 @@ alcoholType = (
     (6, 'Rakija'),
 )
 
-# ingredientType = (
-#     (1, 'Lime'),
-#     (2, 'Apple'),
-#     (3, 'Lemon'),
-#     (4, 'Ice'),
-# )
-
 
 class Drinks(models.Model):
     name_drink = models.CharField(max_length=100)
     desc_drink = models.CharField(max_length=100)
     alcohol_type = models.IntegerField(choices=alcoholType)
-    pub_date = models.DateTimeField('Date Published')
 
     def __str__(self):
         return self.name_drink

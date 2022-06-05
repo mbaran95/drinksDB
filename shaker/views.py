@@ -1,11 +1,14 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views import generic, View
 
-from .forms import DrinksForm, IngredientForm
+from .forms import DrinksForm, IngredientForm, LoginForm, RegistrationForm
 from .models import Drinks, Ingredients
 
 
@@ -29,7 +32,7 @@ class ListDrinksView(View):
         return render(request, 'shaker/list_drinks.html', context)
 
 
-class AddDrinkView(View):
+class AddDrinkView(LoginRequiredMixin, View):
 
     def get(self, request):
         form = DrinksForm()
@@ -45,22 +48,21 @@ class AddDrinkView(View):
                 name_drink=form.cleaned_data['name_drink'],
                 desc_drink=form.cleaned_data['desc_drink'],
                 alcohol_type=form.cleaned_data['alcohol_type'],
-                pub_date=form.cleaned_data['pub_date'],
             )
 
         else:
             messages.error(request, 'Ops, we have a problem.')
 
-        return HttpResponseRedirect(reverse('shaker:add'))
+        return HttpResponseRedirect(reverse('shaker:index'))
 
 
 class DrinksView(View):
 
     def get(self, request, pk):
         form_ingredient = IngredientForm
-        ingredient_list = Ingredients.objects.filter()
+        ingredient_list = Ingredients.objects.filter(drinks=pk)
         try:
-            drinks = Drinks.objects.filter(pub_date__lte=timezone.now()).get(pk=pk)
+            drinks = Drinks.objects.get(pk=pk)
         except Drinks.DoesNotExist:
             raise Http404("Drink does not exist")
         context = {
@@ -80,3 +82,67 @@ class DrinksView(View):
                 name_ingredient=form_ingredient.cleaned_data["name_ingredient"]
             )
         return HttpResponseRedirect(reverse('shaker:drinks', args=(drinks.id,)))
+
+
+class LoginView(View):
+
+    def get(self, request):
+        form = LoginForm()
+        context = {
+            'form': form
+        }
+        return render(request, 'shaker/login.html', context)
+
+    def post(self, request):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(username=username, password=password)
+            if user:
+                login(request, user)
+                url = request.GET.get('next')
+                if url:
+                    return redirect(url)
+                return HttpResponseRedirect(reverse('shaker:index'))
+            messages.error(request, 'Username or password invalid')
+            return HttpResponseRedirect(reverse('shaker:login'))
+        messages.error(request, 'Form was not valid')
+        return HttpResponseRedirect(reverse('shaker:login'))
+
+
+class LogoutView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        logout(request)
+        return HttpResponseRedirect(reverse('shaker:login'))
+
+
+class RegistrationView(View):
+
+    def get(self, request):
+        form = RegistrationForm()
+        context = {
+            "form": form
+        }
+        return render(request, 'shaker/registration.html', context)
+
+    def post(self, request):
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data["password"] == form.cleaned_data["password_conf"]:
+                try:
+                    User.objects.get(username=form.cleaned_data["username"])
+                    messages.error(request, "User already exists")
+                    return HttpResponseRedirect(reverse("polls:registration"))
+                except User.DoesNotExist:
+                    user = User.objects.create_user(
+                        username=form.cleaned_data["username"],
+                        password=form.cleaned_data["password"],
+                        email=form.cleaned_data["email"]
+                    )
+                    login(request, user)
+                    return HttpResponseRedirect(reverse("shaker:index"))
+            else:
+                messages.error(request, "Passwords are wrong!")
+                return HttpResponseRedirect(reverse("shaker:registration"))
