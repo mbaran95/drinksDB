@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views import generic, View
 
-from .forms import DrinksForm, IngredientForm, LoginForm, RegistrationForm
+from .forms import DrinksForm, IngredientForm, LoginForm, RegistrationForm, SearchForm
 from .models import Drinks, Ingredients
 
 
@@ -146,3 +146,26 @@ class RegistrationView(View):
             else:
                 messages.error(request, "Passwords are wrong!")
                 return HttpResponseRedirect(reverse("shaker:registration"))
+
+
+class SearchView(View):
+
+    def get(self, request):
+        form = SearchForm()
+        context = {
+            'form': form
+        }
+        return render(request, 'shaker/search.html', context)
+
+    def post(self, request):
+        form = SearchForm(request.POST)
+        results = None
+        if form.is_valid():
+            results = Drinks.objects.filter(
+                name_drink__contains=form.cleaned_data['name_drink']
+            )
+        context = {
+            'form': form,
+            'results': results
+        }
+        return render(request, 'shaker/search.html', context)

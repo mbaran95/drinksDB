@@ -15,6 +15,7 @@ class Drinks(models.Model):
     name_drink = models.CharField(max_length=100)
     desc_drink = models.CharField(max_length=100)
     alcohol_type = models.IntegerField(choices=alcoholType)
+    image_drink = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return self.name_drink

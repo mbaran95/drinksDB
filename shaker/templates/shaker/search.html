@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+<body>
+
+<h2>Search drinks</h2>
+
+<form action="{% url 'shaker:search' %}" method="post">
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<input type="submit" value="Search">
+</form>
+
+{% if results %}
+{% for drinks in results %}
+<li><a href="{% url 'shaker:drinks' drinks.id %}"> {{ drinks.name_drink }}</a></li>
+{% endfor %}
+{% else %}
+No drinks in the list.
+{% endif %}
+
+<a href="{% url 'shaker:index' %}">Home</a>
+
+</body>
+</html>

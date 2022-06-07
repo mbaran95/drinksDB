@@ -23,3 +23,7 @@ class RegistrationForm(forms.Form):
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
     password_conf = forms.CharField(label="Password confirmation", widget=forms.PasswordInput)
     email = forms.EmailField(label="Email")
+
+
+class SearchForm(forms.Form):
+    name_drink = forms.CharField(max_length=100, label="Search...", required=False)
